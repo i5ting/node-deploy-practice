@@ -65,15 +65,22 @@ expressjs里默认给出的是`node bin/www`
 
 ## pm2高级用法
 
+### stop 
+
+	npm run stop
+	
 ### monit
 
-https://github.com/Unitech/PM2#monitoring
+	npm run monit
 
-	$ pm2 monit
+更多内容 https://github.com/Unitech/PM2#monitoring
 
 ### log
 
-https://github.com/Unitech/PM2#log-facilities
+	npm run log
+
+
+更多内容 https://github.com/Unitech/PM2#log-facilities
 
 	$ pm2 logs
 	$ pm2 logs big-api
@@ -81,14 +88,17 @@ https://github.com/Unitech/PM2#log-facilities
 
 ### web
 
-	$ pm2 web
+	npm run web
 
-
-访问 127.0.0.1:9615
+访问 http://127.0.0.1:9615
 
 ### startup
 
-https://github.com/Unitech/PM2#startup-script-generation
+	npm run startup
+	
+注意：示例的package.json里给出的是centos里增加开机启动项，如果是其他操作系统，请自己更改
+
+更多内容 https://github.com/Unitech/PM2#startup-script-generation
 
 	$ pm2 startup <ubuntu|centos|gentoo|systemd>
 

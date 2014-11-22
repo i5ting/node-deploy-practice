@@ -8,6 +8,7 @@
     "dev": "./node_modules/.bin/supervisor ./bin/www",
 		"test": "./node_modules/.bin/mocha -u tdd",
 		"status": "sudo pm2 status",
+		"stop": "sudo pm2 kill",
 		"web": "sudo pm2 web",
 		"monit": "sudo pm2 monit",
 		"log": "sudo pm2 logs",
