@@ -32,14 +32,20 @@ expressjs里默认给出的是`node bin/www`
 
 ```
 {
-  "name": "QPush",
+  "name": "node-deploy-practice",
   "version": "0.0.1",
   "private": true,
   "scripts": {
     "start": "npm run product",
     "product": "sudo NODE_ENV=production pm2 start bin/www -f -x -i max --name push",
     "dev": "./node_modules/.bin/supervisor ./bin/www",
-		"test": "./node_modules/.bin/mocha -u tdd"
+		"test": "./node_modules/.bin/mocha -u tdd",
+		"status": "sudo pm2 status",
+		"stop": "sudo pm2 kill",
+		"web": "sudo pm2 web",
+		"monit": "sudo pm2 monit",
+		"log": "sudo pm2 logs",
+		"startup": "sudo pm2 startup centos"
   },
   "dependencies": {
     "apn": "^1.6.2",
