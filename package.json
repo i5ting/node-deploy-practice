@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "npm run product",
-    "product": "sudo NODE_ENV=production pm2 start bin/www -f -x -i max --name push",
+    "product": "sudo NODE_ENV=production pm2 start bin/www -f -x -i max --name node-deploy-practice",
     "dev": "./node_modules/.bin/supervisor ./bin/www",
 		"test": "./node_modules/.bin/mocha -u tdd",
 		"status": "sudo pm2 status",
