@@ -14,6 +14,19 @@ expressjs里默认给出的是`node bin/www`
 
 产品模式我们推荐使用pm2
 
+pm2是非常优秀工具，它提供对基于node.js的项目运行托管服务。它基于命令行界面，提供很多特性：
+
+- 内置的负载均衡器（使用nodecluster module）
+- 以守护进程运行
+- 0s(不间断)重启
+- 为ubuntu/ CentOS 提供启动脚本
+- 关闭不稳定的进程（避免无限死循环）
+- 基于控制台监控
+- HTTP API
+- 远程控制以及实时监控接口
+
+pm2使用nodecluster构建一个内置的负载均衡器。部署多个app的实例来达到分流的目的以减轻单app处理的压力。
+
 安装pm2
 
  sudo npm install -g pm2
@@ -24,7 +37,12 @@ expressjs里默认给出的是`node bin/www`
 
 ### 启动开发模式
 
-开发模式我们推荐supervisor
+开发模式我们推荐 supervisor
+
+因为我们在开发过程中总是希望修改后立即看到效果，而不是每次都要终止进程并重启。
+
+supervisor 可以帮助你实现这个功能，它会监视你对代码的改动，并自动重启 Node.js
+
 
 	npm start dev
 
