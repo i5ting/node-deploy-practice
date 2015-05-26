@@ -57,13 +57,13 @@ supervisor 可以帮助你实现这个功能，它会监视你对代码的改动
     "start": "npm run product",
     "product": "sudo NODE_ENV=production pm2 start bin/www -f -x -i max --name push",
     "dev": "./node_modules/.bin/supervisor ./bin/www",
-		"test": "./node_modules/.bin/mocha -u tdd",
-		"status": "sudo pm2 status",
-		"stop": "sudo pm2 kill",
-		"web": "sudo pm2 web",
-		"monit": "sudo pm2 monit",
-		"log": "sudo pm2 logs",
-		"startup": "sudo pm2 startup centos"
+	"test": "./node_modules/.bin/mocha -u tdd",
+	"status": "sudo pm2 status",
+	"stop": "sudo pm2 kill",
+	"web": "sudo pm2 web",
+	"monit": "sudo pm2 monit",
+	"log": "sudo pm2 logs",
+	"startup": "sudo pm2 startup centos"
   },
   "dependencies": {
     "apn": "^1.6.2",
@@ -126,6 +126,14 @@ supervisor 可以帮助你实现这个功能，它会监视你对代码的改动
 
 	$ pm2 startup <ubuntu|centos|gentoo|systemd>
 
+## 实战
+
+### 创建部署文件
+
+	pm2 ecosystem
+
 ## 资源
 
-https://github.com/Unitech/PM2
+- http://promotion.pm2.io/
+- https://github.com/Unitech/PM2
+- https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps
