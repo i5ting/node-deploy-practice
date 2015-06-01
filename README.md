@@ -345,15 +345,16 @@ passenger是rails部署时常用的服务器，不过庆幸的是这帮货出了
 
 ## mongodb的部署
 
-- 安全
-- 集群
+- 安全 https://cnodejs.org/topic/54cdd026ef1b48510c27e07a
+- 集群 http://www.linuxidc.com/Linux/2015-02/113296.htm
 
 ## redis部署
 
+http://www.linuxidc.com/Linux/2014-07/104306.htm
 
 ## 简单压测
 
-- ab
+- apache ab
 - wrk
 
 ## node cluster和nginx负载性能比较
@@ -369,9 +370,11 @@ todo
 
 ## keeplive
 
+- http://www.bubuko.com/infodetail-260176.html
 
 ## 监控
 
+- newrelic https://cnodejs.org/topic/53fde58d7c1e2284785cd39e
 
 
 ## 资源
