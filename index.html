@@ -133,7 +133,39 @@
 .highlight .il { color: #40a070 } /* Literal.Number.Integer.Long */</style>
 <h1>node-deploy-practice</h1>
 
-<h2>启动服务器</h2>
+<h2>如何选择node版本？</h2>
+
+<p>从目前的测试数据来看，iojs新版本性能会更好一些，如果测试写的不够多的话，老老实实的用开发时的版本吧</p>
+
+<p>推荐nvm，是node version manager，是借鉴rvm的一个开源项目</p>
+
+<ul>
+<li>nvm 支持多版本</li>
+<li>nvm支持多版本npm包切换，而且安装在用户目录下面，不需要使用sudo安装</li>
+</ul>
+
+<h2>统一环境</h2>
+
+<p>开发环境</p>
+
+<ul>
+<li>nvm</li>
+<li>nrm</li>
+<li>nodejs 0.10.38</li>
+<li>node-inspector</li>
+</ul>
+
+<p>部署环境</p>
+
+<ul>
+<li>nvm</li>
+<li>nrm</li>
+<li>iojs 2.x</li>
+<li>pm2</li>
+<li>nginx</li>
+</ul>
+
+<h2>express 部署</h2>
 
 <p>expressjs里默认给出的是<code>node bin/www</code></p>
 
@@ -144,7 +176,69 @@
 <li>代码变动不能自动reload，不适合开发模式</li>
 </ol>
 
-<h3>启动产品上线模式</h3>
+<p>所以我们需要把<code>bin/www</code>干掉，把启动服务器的代码放到app.js，这样就可以使用pm2了。安装supervisor模块，自动relaod</p>
+
+<p><strong>EXPRESS最新版本需要测测</strong></p>
+
+<p>本文主要介绍express线上部署实践</p>
+
+<p>先看一下3个模式</p>
+
+<ul>
+<li>开发模式</li>
+<li>调试模式</li>
+<li>产品模式</li>
+</ul>
+
+<h2>启动开发模式</h2>
+
+<p>因为我们在开发过程中总是希望修改后立即看到效果，而不是每次都要终止进程并重启。</p>
+
+<p>supervisor 可以帮助你实现这个功能，它会监视你对代码的改动，并自动重启 Node.js</p>
+
+<p>开发模式我推荐 supervisor</p>
+
+<p>安装</p>
+<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">install</span><span class="w"> </span><span class="o">--</span><span class="vg">save</span><span class="w"> </span><span class="vg">supervisor</span>
+</pre></div>
+<p>启动</p>
+<div class="highlight"><pre><span class="vg">supervisor</span><span class="w"> </span><span class="vg">app</span><span class="o">.</span><span class="vg">js</span><span class="w"> </span><span class="vg">or</span><span class="w"> </span><span class="vg">supervisor</span><span class="w"> </span><span class="vg">www</span><span class="o">/</span><span class="vg">bin</span>
+</pre></div>
+<p>我的实践是把package.json里的start</p>
+<div class="highlight"><pre><span class="s2">&quot;scripts&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;d&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;node-debug app.js&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;start&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./node_modules/.bin/supervisor app.js&quot;</span>
+<span class="p">}</span>
+</pre></div>
+<p>然后</p>
+<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">start</span>
+</pre></div>
+<p>还有一个库也不错，叫nodemon</p>
+
+<p>see http://nodemon.io/</p>
+
+<h2>调试模式</h2>
+
+<p>推荐node-inspector</p>
+
+<p>安装</p>
+<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">install</span><span class="w"> </span><span class="o">--</span><span class="vg">save</span><span class="w"> </span><span class="vg">node</span><span class="o">-</span><span class="vg">inspector</span>
+</pre></div>
+<p>启动</p>
+<div class="highlight"><pre><span class="vg">node</span><span class="o">-</span><span class="vg">inspector</span><span class="w"> </span><span class="vg">app</span><span class="o">.</span><span class="vg">js</span><span class="w"> </span><span class="vg">or</span><span class="w"> </span><span class="vg">node</span><span class="o">-</span><span class="vg">debug</span><span class="w"> </span><span class="vg">www</span><span class="o">/</span><span class="vg">bin</span>
+</pre></div>
+<p>我的实践是把package.json里的d里</p>
+<div class="highlight"><pre><span class="s2">&quot;scripts&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="s2">&quot;d&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;node-debug app.js&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">&quot;start&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./node_modules/.bin/supervisor app.js&quot;</span>
+<span class="p">}</span>
+</pre></div>
+<p>然后执行</p>
+<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">run</span><span class="w"> </span><span class="vg">d</span>
+</pre></div>
+<p>npm run命令详解，见https://github.com/i5ting/npm-run-test</p>
+
+<h2>启动产品上线模式</h2>
 
 <p>产品模式我们推荐使用pm2</p>
 
@@ -164,72 +258,165 @@
 <p>pm2使用nodecluster构建一个内置的负载均衡器。部署多个app的实例来达到分流的目的以减轻单app处理的压力。</p>
 
 <p>安装pm2</p>
-
-<p>sudo npm install -g pm2</p>
-
-<p>启动服务器</p>
-<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">start</span><span class="w"> </span><span class="vg">product</span>
+<div class="highlight"><pre><span class="vg">sudo</span><span class="w"> </span><span class="vg">npm</span><span class="w"> </span><span class="vg">install</span><span class="w"> </span><span class="o">-</span><span class="vg">g</span><span class="w"> </span><span class="vg">pm2</span>
 </pre></div>
-<h3>启动开发模式</h3>
+<p>查看基本帮助文档</p>
+<div class="highlight"><pre><span class="w">  </span><span class="vg">Basic</span><span class="w"> </span><span class="nl">Examples:</span>
 
-<p>开发模式我们推荐 supervisor</p>
+<span class="w">    </span><span class="vg">Start</span><span class="w"> </span><span class="vg">an</span><span class="w"> </span><span class="vg">app</span><span class="w"> </span><span class="vg">using</span><span class="w"> </span><span class="vg">all</span><span class="w"> </span><span class="vg">CPUs</span><span class="w"> </span><span class="vg">available</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="vg">set</span><span class="w"> </span><span class="vg">a</span><span class="w"> </span><span class="vg">name</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">start</span><span class="w"> </span><span class="vg">app</span><span class="o">.</span><span class="vg">js</span><span class="w"> </span><span class="o">-</span><span class="vg">i</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="o">--</span><span class="vg">name</span><span class="w"> </span><span class="s2">&quot;api&quot;</span>
 
-<p>因为我们在开发过程中总是希望修改后立即看到效果，而不是每次都要终止进程并重启。</p>
+<span class="w">    </span><span class="vg">Restart</span><span class="w"> </span><span class="vg">the</span><span class="w"> </span><span class="vg">previous</span><span class="w"> </span><span class="vg">app</span><span class="w"> </span><span class="vg">launched</span><span class="p">,</span><span class="w"> </span><span class="vg">by</span><span class="w"> </span><span class="vg">name</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">restart</span><span class="w"> </span><span class="vg">api</span>
 
-<p>supervisor 可以帮助你实现这个功能，它会监视你对代码的改动，并自动重启 Node.js</p>
-<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">start</span><span class="w"> </span><span class="vg">dev</span>
+<span class="w">    </span><span class="vg">Stop</span><span class="w"> </span><span class="vg">the</span><span class="w"> </span><span class="vg">app</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">stop</span><span class="w"> </span><span class="vg">api</span>
+
+<span class="w">    </span><span class="vg">Restart</span><span class="w"> </span><span class="vg">the</span><span class="w"> </span><span class="vg">app</span><span class="w"> </span><span class="vg">that</span><span class="w"> </span><span class="vg">is</span><span class="w"> </span><span class="vg">stopped</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">restart</span><span class="w"> </span><span class="vg">api</span>
+
+<span class="w">    </span><span class="vg">Remove</span><span class="w"> </span><span class="vg">the</span><span class="w"> </span><span class="vg">app</span><span class="w"> </span><span class="vg">from</span><span class="w"> </span><span class="vg">the</span><span class="w"> </span><span class="vg">process</span><span class="w"> </span><span class="vg">list</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">delete</span><span class="w"> </span><span class="vg">api</span>
+
+<span class="w">    </span><span class="vg">Kill</span><span class="w"> </span><span class="vg">daemon</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">kill</span>
+
+<span class="w">    </span><span class="vg">Update</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="o">:</span>
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">npm</span><span class="w"> </span><span class="vg">install</span><span class="w"> </span><span class="vg">pm2@latest</span><span class="w"> </span><span class="o">-</span><span class="vg">g</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">updatePM2</span>
+
+<span class="w">    </span><span class="vg">More</span><span class="w"> </span><span class="vg">examples</span><span class="w"> </span><span class="vg">in</span><span class="w"> </span><span class="nl">https:</span><span class="o">//</span><span class="vg">github</span><span class="o">.</span><span class="vg">com</span><span class="o">/</span><span class="vg">Unitech</span><span class="o">/</span><span class="vg">pm2#usagefeatures</span>
+
+<span class="w">  </span><span class="vg">Deployment</span><span class="w"> </span><span class="nl">help:</span>
+
+<span class="w">    </span><span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">deploy</span><span class="w"> </span><span class="vg">help</span>
 </pre></div>
-<h3>package.json示例</h3>
-<div class="highlight"><pre><span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;name&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;node-deploy-practice&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;version&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;0.0.1&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;private&quot;</span><span class="o">:</span><span class="w"> </span><span class="vg">true</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;scripts&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;start&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;npm run product&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;product&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo NODE_ENV=production pm2 start bin/www -f -x -i max --name push&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;dev&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./node_modules/.bin/supervisor ./bin/www&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;test&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;./node_modules/.bin/mocha -u tdd&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;status&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo pm2 status&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;stop&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo pm2 kill&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;web&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo pm2 web&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;monit&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo pm2 monit&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;log&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo pm2 logs&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="s2">&quot;startup&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;sudo pm2 startup centos&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s2">&quot;dependencies&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;apn&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;^1.6.2&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;body-parser&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~1.8.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;cookie-parser&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~1.3.3&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;debug&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~2.0.0&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;express&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~4.9.0&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;jade&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~1.6.0&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;morgan&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~1.3.0&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;pm2&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;^0.12.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;serve-favicon&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;~2.1.3&quot;</span>
-<span class="w">  </span><span class="p">},</span>
-<span class="w">  </span><span class="s2">&quot;devDependencies&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;mocha&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;^2.0.1&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="s2">&quot;supervisor&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;^0.6.0&quot;</span>
-<span class="w">  </span><span class="p">}</span>
+<p>上面基本是我们比较常用的</p>
+
+<h2>pm2的最佳实践</h2>
+
+<p>把启动写到json配置文件中</p>
+<div class="highlight"><pre><span class="c1">// 20150531071243</span>
+<span class="c1">// https://raw.githubusercontent.com/RocketChat/Rocket.Chat/master/pm2.production.json</span>
+
+<span class="p">{</span>
+  <span class="s">&quot;apps&quot;</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="s">&quot;name&quot;</span><span class="o">:</span> <span class="s">&quot;rocket.chat.0&quot;</span><span class="p">,</span>
+      <span class="s">&quot;max_memory_restart&quot;</span><span class="o">:</span> <span class="s">&quot;1024M&quot;</span><span class="p">,</span>
+      <span class="s">&quot;log_date_format&quot;</span><span class="o">:</span> <span class="s">&quot;YYYY-MM-DD HH:mm:ss SSS&quot;</span><span class="p">,</span>
+      <span class="s">&quot;script&quot;</span><span class="o">:</span> <span class="s">&quot;/var/www/rocket.chat/bundle/main.js&quot;</span><span class="p">,</span>
+      <span class="s">&quot;out_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/app.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;error_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/err.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;port&quot;</span><span class="o">:</span> <span class="s">&quot;8080&quot;</span><span class="p">,</span>
+      <span class="s">&quot;env&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s">&quot;CDN_PREFIX&quot;</span><span class="o">:</span> <span class="s">&quot;//dbde4sd21oahf.cloudfront.net&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/rocketchat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_OPLOG_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/local&quot;</span><span class="p">,</span>
+        <span class="s">&quot;ROOT_URL&quot;</span><span class="o">:</span> <span class="s">&quot;http://rocket.chat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;PORT&quot;</span><span class="o">:</span> <span class="s">&quot;8080&quot;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s">&quot;name&quot;</span><span class="o">:</span> <span class="s">&quot;rocket.chat.1&quot;</span><span class="p">,</span>
+      <span class="s">&quot;max_memory_restart&quot;</span><span class="o">:</span> <span class="s">&quot;1024M&quot;</span><span class="p">,</span>
+      <span class="s">&quot;log_date_format&quot;</span><span class="o">:</span> <span class="s">&quot;YYYY-MM-DD HH:mm:ss SSS&quot;</span><span class="p">,</span>
+      <span class="s">&quot;script&quot;</span><span class="o">:</span> <span class="s">&quot;/var/www/rocket.chat/bundle/main.js&quot;</span><span class="p">,</span>
+      <span class="s">&quot;out_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/app.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;error_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/err.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;port&quot;</span><span class="o">:</span> <span class="s">&quot;8081&quot;</span><span class="p">,</span>
+      <span class="s">&quot;env&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s">&quot;CDN_PREFIX&quot;</span><span class="o">:</span> <span class="s">&quot;//dbde4sd21oahf.cloudfront.net&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/rocketchat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_OPLOG_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/local&quot;</span><span class="p">,</span>
+        <span class="s">&quot;ROOT_URL&quot;</span><span class="o">:</span> <span class="s">&quot;http://rocket.chat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;PORT&quot;</span><span class="o">:</span> <span class="s">&quot;8081&quot;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s">&quot;name&quot;</span><span class="o">:</span> <span class="s">&quot;rocket.chat.2&quot;</span><span class="p">,</span>
+      <span class="s">&quot;max_memory_restart&quot;</span><span class="o">:</span> <span class="s">&quot;1024M&quot;</span><span class="p">,</span>
+      <span class="s">&quot;log_date_format&quot;</span><span class="o">:</span> <span class="s">&quot;YYYY-MM-DD HH:mm:ss SSS&quot;</span><span class="p">,</span>
+      <span class="s">&quot;script&quot;</span><span class="o">:</span> <span class="s">&quot;/var/www/rocket.chat/bundle/main.js&quot;</span><span class="p">,</span>
+      <span class="s">&quot;out_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/app.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;error_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/err.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;port&quot;</span><span class="o">:</span> <span class="s">&quot;8082&quot;</span><span class="p">,</span>
+      <span class="s">&quot;env&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s">&quot;CDN_PREFIX&quot;</span><span class="o">:</span> <span class="s">&quot;//dbde4sd21oahf.cloudfront.net&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/rocketchat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_OPLOG_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/local&quot;</span><span class="p">,</span>
+        <span class="s">&quot;ROOT_URL&quot;</span><span class="o">:</span> <span class="s">&quot;http://rocket.chat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;PORT&quot;</span><span class="o">:</span> <span class="s">&quot;8082&quot;</span>
+      <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="s">&quot;name&quot;</span><span class="o">:</span> <span class="s">&quot;rocket.chat.3&quot;</span><span class="p">,</span>
+      <span class="s">&quot;max_memory_restart&quot;</span><span class="o">:</span> <span class="s">&quot;1024M&quot;</span><span class="p">,</span>
+      <span class="s">&quot;log_date_format&quot;</span><span class="o">:</span> <span class="s">&quot;YYYY-MM-DD HH:mm:ss SSS&quot;</span><span class="p">,</span>
+      <span class="s">&quot;script&quot;</span><span class="o">:</span> <span class="s">&quot;/var/www/rocket.chat/bundle/main.js&quot;</span><span class="p">,</span>
+      <span class="s">&quot;out_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/app.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;error_file&quot;</span><span class="o">:</span> <span class="s">&quot;/var/log/rocket.chat/err.log&quot;</span><span class="p">,</span>
+      <span class="s">&quot;port&quot;</span><span class="o">:</span> <span class="s">&quot;8083&quot;</span><span class="p">,</span>
+      <span class="s">&quot;env&quot;</span><span class="o">:</span> <span class="p">{</span>
+        <span class="s">&quot;CDN_PREFIX&quot;</span><span class="o">:</span> <span class="s">&quot;//dbde4sd21oahf.cloudfront.net&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/rocketchat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;MONGO_OPLOG_URL&quot;</span><span class="o">:</span> <span class="s">&quot;mongodb://localhost:27017/local&quot;</span><span class="p">,</span>
+        <span class="s">&quot;ROOT_URL&quot;</span><span class="o">:</span> <span class="s">&quot;http://rocket.chat&quot;</span><span class="p">,</span>
+        <span class="s">&quot;PORT&quot;</span><span class="o">:</span> <span class="s">&quot;8083&quot;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">]</span>
 <span class="p">}</span>
 </pre></div>
-<h3>npm run命令详解</h3>
+<p>部署</p>
+<div class="highlight"><pre><span class="vg">pm2</span><span class="w"> </span><span class="vg">deploy</span><span class="w"> </span><span class="vg">ecosystem</span><span class="o">.</span><span class="vg">json</span><span class="w"> </span><span class="vg">production</span><span class="w"> </span><span class="vg">setup</span>
+</pre></div>
+<p>第一个傻瓜原则，你的机器有几核，你就几个实例</p>
+<div class="highlight"><pre><span class="vg">Start</span><span class="w"> </span><span class="vg">an</span><span class="w"> </span><span class="vg">app</span><span class="w"> </span><span class="vg">using</span><span class="w"> </span><span class="vg">all</span><span class="w"> </span><span class="vg">CPUs</span><span class="w"> </span><span class="vg">available</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="vg">set</span><span class="w"> </span><span class="vg">a</span><span class="w"> </span><span class="vg">name</span><span class="w"> </span><span class="o">:</span>
+<span class="err">$</span><span class="w"> </span><span class="vg">pm2</span><span class="w"> </span><span class="vg">start</span><span class="w"> </span><span class="vg">app</span><span class="o">.</span><span class="vg">js</span><span class="w"> </span><span class="o">-</span><span class="vg">i</span><span class="w"> </span><span class="il">0</span><span class="w"> </span><span class="o">--</span><span class="vg">name</span><span class="w"> </span><span class="s2">&quot;api&quot;</span>
+</pre></div>
+<p>上面的配置文件了配置了4个，你应该能自己估算出点什么</p>
 
-<p>见https://github.com/i5ting/npm-run-test</p>
+<p>第二个傻瓜原则，想机器瘫痪么？最简单的办法是内存不足，怎么样能防止内存被吃尽呢？</p>
+
+<p>很简单，和lru cache一样，设置最大可用内存，防止内存用爆</p>
+
+<p>参数里</p>
+<div class="highlight"><pre><span class="w"> </span><span class="o">--</span><span class="vg">max</span><span class="o">-</span><span class="vg">memory</span><span class="o">-</span><span class="vg">restart</span><span class="w"> </span><span class="o">&lt;</span><span class="vg">memory</span><span class="o">&gt;</span><span class="w">        </span><span class="vg">specify</span><span class="w"> </span><span class="vg">max</span><span class="w"> </span><span class="vg">memory</span><span class="w"> </span><span class="vg">amount</span><span class="w"> </span><span class="vg">used</span><span class="w"> </span><span class="vg">to</span><span class="w"> </span><span class="vg">autorestart</span><span class="w"> </span><span class="p">(</span><span class="vg">in</span><span class="w"> </span><span class="vg">megaoctets</span><span class="p">)</span>
+</pre></div>
+<p>配置文件了也一样</p>
+<div class="highlight"><pre><span class="s2">&quot;max_memory_restart&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1024M&quot;</span><span class="p">,</span>
+</pre></div>
+<p>4个实例，每个可占用内存为1G，那么你应该能自己估算出点什么</p>
+
+<p>第三个傻瓜原则，敏感信息咋办？有2种办法</p>
+
+<ol>
+<li>使用config/default.example.json。部署的时候拷贝一份，然后按需修改</li>
+<li>使用pm2的env，在环境变量里配置，pm2的json是在服务器上生成的，每个服务器都要生成一次的</li>
+</ol>
+
+<p>推荐pm2的env这种方式，相对更简单点</p>
+
+<p>第四个傻瓜原则，集群状态下的应用应该是stateless的（无状态），不能依赖代码去做一些事儿的，比如自己写队列处理cache</p>
+
+<p>因为每个实例都是独立的，你读写不是全局的，一定会有各种问题，尽量使用第三方独立的服务，比如配置文件（非实例下面），比如redis等缓存，db等</p>
 
 <h2>pm2高级用法</h2>
 
-<h3>stop</h3>
-<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">run</span><span class="w"> </span><span class="vg">stop</span>
+<h3>reload</h3>
+
+<p>启动的时候会指定一个名字，以后根据该名字，进行特定操作</p>
+<div class="highlight"><pre><span class="vg">pm2</span><span class="w"> </span><span class="vg">reload</span><span class="w"> </span><span class="vg">some</span><span class="o">-</span><span class="vg">app</span>
 </pre></div>
+<p>它的好处是0秒延时，可以和<code>nginx -s reload</code>媲美</p>
+
 <h3>monit</h3>
-<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">run</span><span class="w"> </span><span class="vg">monit</span>
+<div class="highlight"><pre><span class="vg">pm2</span><span class="w"> </span><span class="vg">monit</span>
 </pre></div>
 <p>更多内容 https://github.com/Unitech/PM2#monitoring</p>
 
-<h3>log</h3>
-<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">run</span><span class="w"> </span><span class="vg">log</span>
-</pre></div>
+<h3>日志</h3>
+
 <p>更多内容 https://github.com/Unitech/PM2#log-facilities</p>
 <div class="highlight"><pre><span class="nv">$ </span>pm2 logs
 <span class="nv">$ </span>pm2 logs big-api
@@ -240,17 +427,73 @@
 </pre></div>
 <p>访问 http://127.0.0.1:9615</p>
 
-<h3>startup</h3>
-<div class="highlight"><pre><span class="vg">npm</span><span class="w"> </span><span class="vg">run</span><span class="w"> </span><span class="vg">startup</span>
+<h3>开机启动</h3>
+<div class="highlight"><pre><span class="vg">pm2</span><span class="w"> </span><span class="vg">startup</span><span class="w"> </span><span class="vg">centos</span>
 </pre></div>
 <p>注意：示例的package.json里给出的是centos里增加开机启动项，如果是其他操作系统，请自己更改</p>
 
 <p>更多内容 https://github.com/Unitech/PM2#startup-script-generation</p>
 <div class="highlight"><pre><span class="nv">$ </span>pm2 startup &lt;ubuntu<span class="p">|</span>centos<span class="p">|</span>gentoo<span class="p">|</span>systemd&gt;
 </pre></div>
+<p>开机启动，还要注意的一点是要保存一次pm2运行数据的</p>
+<div class="highlight"><pre><span class="vg">pm2</span><span class="w"> </span><span class="vg">save</span>
+</pre></div>
+<h2>要不要nginx 或者 haproxy ？</h2>
+
+<p>nginx</p>
+
+<ul>
+<li>主要做反向代理和静态资源处理（如果没有cdn，就把public下的内容放到nginx里）</li>
+<li>负载</li>
+</ul>
+
+<p>nginx负载对应多台机器，每台机器里起多个（cpu个数）实例，单机负载使用pm2管理。</p>
+
+<p>nginx和haproxy都是针对多台机器的负载，功能差不过，使用和插件方面，nginx稍强一点，知名度更高一点</p>
+
+<h2>另外一种部署方式</h2>
+
+<p>passenger是rails部署时常用的服务器，不过庆幸的是这帮货出了node版本，而且性能不错</p>
+
+<p>有兴趣的可以去研究一下 nginx + passenger</p>
+
+<h2>mongodb的部署</h2>
+
+<ul>
+<li>安全</li>
+<li>集群</li>
+</ul>
+
+<h2>redis部署</h2>
+
+<h2>简单压测</h2>
+
+<ul>
+<li>ab</li>
+<li>wrk</li>
+</ul>
+
+<h2>node cluster和nginx负载性能比较</h2>
+
+<p>todo</p>
+
+<p>别人测试的node的性能稍高，不过我还是想自己测测</p>
+
+<h2>性能调优</h2>
+
+<p>todo</p>
+
+<h2>keeplive</h2>
+
+<h2>监控</h2>
+
 <h2>资源</h2>
 
-<p>https://github.com/Unitech/PM2</p>
+<ul>
+<li>http://promotion.pm2.io/</li>
+<li>https://github.com/Unitech/PM2</li>
+<li>https://www.digitalocean.com/community/tutorials/how-to-use-pm2-to-setup-a-node-js-production-environment-on-an-ubuntu-vps</li>
+</ul>
 
 			          	</article>
 			        </div>
