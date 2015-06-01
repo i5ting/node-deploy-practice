@@ -1,6 +1,36 @@
 node-deploy-practice
 ====================
 
+
+## 如何选择node版本？
+
+从目前的测试数据来看，iojs新版本性能会更好一些，如果测试写的不够多的话，老老实实的用开发时的版本吧
+
+推荐nvm，是node version manager，是借鉴rvm的一个开源项目
+
+- nvm 支持多版本
+- nvm支持多版本npm包切换，而且安装在用户目录下面，不需要使用sudo安装
+
+
+## 统一环境
+
+开发环境
+
+- nvm
+- nrm
+- nodejs 0.10.38
+- node-inspector
+
+部署环境
+
+- nvm
+- nrm
+- iojs 2.x
+- pm2
+- nginx
+
+## express 部署
+
 expressjs里默认给出的是`node bin/www`
 
 它有2个问题
@@ -9,6 +39,8 @@ expressjs里默认给出的是`node bin/www`
 1. 代码变动不能自动reload，不适合开发模式
 
 所以我们需要把`bin/www`干掉，把启动服务器的代码放到app.js，这样就可以使用pm2了。安装supervisor模块，自动relaod
+
+**EXPRESS最新版本需要测测**
 
 本文主要介绍express线上部署实践
 
@@ -249,13 +281,17 @@ pm2使用nodecluster构建一个内置的负载均衡器。部署多个app的实
 
 ## pm2高级用法
 
-### stop 
+### reload
 
-	npm run stop
+启动的时候会指定一个名字，以后根据该名字，进行特定操作
+
+	pm2 reload some-app
+
+它的好处是0秒延时，可以和`nginx -s reload`媲美
 	
 ### monit
 
-	npm run monit
+	pm2 monit
 
 更多内容 https://github.com/Unitech/PM2#monitoring
 
@@ -282,12 +318,61 @@ pm2使用nodecluster构建一个内置的负载均衡器。部署多个app的实
 更多内容 https://github.com/Unitech/PM2#startup-script-generation
 
 	$ pm2 startup <ubuntu|centos|gentoo|systemd>
+    
+开机启动，还要注意的一点是要保存一次pm2运行数据的
 
-## 实战
+    pm2 save
+    
 
-### 创建部署文件
+## 要不要nginx 或者 haproxy ？
 
-	pm2 ecosystem
+nginx
+
+- 主要做反向代理和静态资源处理（如果没有cdn，就把public下的内容放到nginx里）
+- 负载
+
+nginx负载对应多台机器，每台机器里起多个（cpu个数）实例，单机负载使用pm2管理。
+
+nginx和haproxy都是针对多台机器的负载，功能差不过，使用和插件方面，nginx稍强一点，知名度更高一点
+
+
+## 另外一种部署方式
+
+passenger是rails部署时常用的服务器，不过庆幸的是这帮货出了node版本，而且性能不错
+
+有兴趣的可以去研究一下 nginx + passenger
+
+
+## mongodb的部署
+
+- 安全
+- 集群
+
+## redis部署
+
+
+## 简单压测
+
+- ab
+- wrk
+
+## node cluster和nginx负载性能比较
+
+todo
+
+别人测试的node的性能稍高，不过我还是想自己测测
+
+
+## 性能调优
+
+todo
+
+## keeplive
+
+
+## 监控
+
+
 
 ## 资源
 
